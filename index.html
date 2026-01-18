@@ -291,14 +291,21 @@
 
             /* Слайдер на весь экран */
             .slider-container { height: 80vh; border-radius: 20px; }
-            .slide-title { font-size: 2.8rem; line-height: 1.1; }
-            .slide-tag { font-size: 0.9rem; }
+            
+            /* ИСПРАВЛЕНИЕ: Уменьшенный шрифт для заголовков на телефоне */
+            .slide-title { 
+                font-size: 2rem; /* Уменьшили с 2.8rem */
+                line-height: 1.2; 
+                word-wrap: break-word; /* Перенос слов */
+                hyphens: auto; /* Расстановка переносов */
+            }
+            .slide-tag { font-size: 0.8rem; letter-spacing: 1px; }
             
             /* Скрываем кнопку пожертвовать в хедере (она в меню) */
             header .btn-donate { display: none; } 
             
             /* Секции */
-            .section-title { font-size: 2rem; }
+            .section-title { font-size: 1.8rem; }
             .section-header { flex-direction: column; align-items: flex-start; gap: 15px; }
             .video-grid { grid-template-columns: 1fr; }
             
@@ -322,7 +329,7 @@
     <div class="mobile-overlay" id="overlay" onclick="toggleMenu()"></div>
     <div class="mobile-sidebar" id="sidebar">
         <a href="#top" class="mob-link" onclick="toggleMenu()">Главная</a>
-        <a href="#video-feed" class="mob-link" onclick="toggleMenu()">Проповеди</a>
+        <a href="#video-feed" class="mob-link" onclick="toggleMenu()">Новости</a>
         <a href="#contacts" class="mob-link" onclick="toggleMenu()">Контакты</a>
         <button class="btn-donate" onclick="toggleMenu(); openModal()" style="margin-top:20px; width:100%">Пожертвовать</button>
     </div>
@@ -342,7 +349,7 @@
 
         <nav class="desktop-nav">
             <a href="#top" class="nav-link">Главная</a>
-            <a href="#video-feed" class="nav-link">Проповеди</a>
+            <a href="#video-feed" class="nav-link">Новости</a>
             <a href="#contacts" class="nav-link">Контакты</a>
         </nav>
 
@@ -384,11 +391,12 @@
     <div class="main-container" id="video-feed">
         <div class="info-block">
             <div class="section-header">
-                <h2 class="section-title">Проповеди</h2>
-                <a href="https://www.youtube.com/@yachurch" target="_blank" class="btn-outline">Все видео</a>
+                <h2 class="section-title">ВКонтакте</h2>
+                <a href="https://vk.com/yachurch" target="_blank" class="btn-outline">Группа ВК</a>
             </div>
-            <div class="video-grid" id="youtube-container">
-                <p style="color:var(--text-secondary)">Загрузка видео...</p>
+            <!-- Контейнер для ВК -->
+            <div class="video-grid" id="vk-container">
+                <p style="color:var(--text-secondary)">Загрузка новостей...</p>
             </div>
         </div>
     </div>
@@ -472,7 +480,7 @@
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
         });
 
-        // --- 2. СЛАЙДЕР С ПОДДЕРЖКОЙ СВАЙПОВ ---
+        // --- 2. СЛАЙДЕР ---
         let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');
         let touchStartX = 0;
@@ -484,55 +492,71 @@
             slides[currentSlide].classList.add('active');
         }
         
-        // Автопереключение
         let sliderInterval = setInterval(() => moveSlide(1), 7000);
 
-        // Обработка свайпов
         const sliderContainer = document.getElementById('mainSlider');
-        
         sliderContainer.addEventListener('touchstart', e => {
             touchStartX = e.changedTouches[0].screenX;
-            clearInterval(sliderInterval); // Останавливаем автоплей при касании
+            clearInterval(sliderInterval);
         });
-
         sliderContainer.addEventListener('touchend', e => {
             touchEndX = e.changedTouches[0].screenX;
-            handleSwipe();
-            sliderInterval = setInterval(() => moveSlide(1), 7000); // Запускаем снова
+            if (touchEndX < touchStartX - 50) moveSlide(1);
+            if (touchEndX > touchStartX + 50) moveSlide(-1);
+            sliderInterval = setInterval(() => moveSlide(1), 7000);
         });
 
-        function handleSwipe() {
-            if (touchEndX < touchStartX - 50) {
-                moveSlide(1); // Свайп влево -> следующий слайд
-            }
-            if (touchEndX > touchStartX + 50) {
-                moveSlide(-1); // Свайп вправо -> предыдущий слайд
-            }
-        }
-
-        // --- 3. YOUTUBE ---
-        const channelID = "UCBZ_qrBtWpSAPhHmb9Mtp-A"; 
-        const rssUrl = `https://api.rss2json.com/v1/api.json?rss_url=https://www.youtube.com/feeds/videos.xml?channel_id=${channelID}`;
+        // --- 3. VK RSS FETCH ---
+        // Используем RSS ленту сообщества
+        const vkRssUrl = `https://api.rss2json.com/v1/api.json?rss_url=https://vk.com/rss.php?domain=yachurch`;
         
-        async function loadVideos() {
-            const container = document.getElementById('youtube-container');
+        async function loadVkFeed() {
+            const container = document.getElementById('vk-container');
             try {
-                const res = await fetch(rssUrl);
+                const res = await fetch(vkRssUrl);
                 const data = await res.json();
                 if(data.status === 'ok') {
                     container.innerHTML = '';
-                    data.items.slice(0,3).forEach(v => {
+                    // Берем первые 3 поста
+                    data.items.slice(0,3).forEach(item => {
                         const link = document.createElement('a');
                         link.className = 'video-card';
-                        link.href = v.link; link.target = '_blank';
-                        link.style.backgroundImage = `url('${v.thumbnail.replace('hqdefault', 'maxresdefault')}')`;
+                        link.href = item.link; 
+                        link.target = '_blank';
+                        
+                        // Пытаемся найти картинку в content или enclosure
+                        let imgUrl = '';
+                        if (item.enclosure && item.enclosure.link) {
+                            imgUrl = item.enclosure.link;
+                        } else {
+                            // Парсим описание на наличие img
+                            const div = document.createElement('div');
+                            div.innerHTML = item.description;
+                            const img = div.querySelector('img');
+                            if (img) imgUrl = img.src;
+                        }
+
+                        // Если картинки нет, ставим заглушку (логотип)
+                        if (imgUrl) {
+                            link.style.backgroundImage = `url('${imgUrl}')`;
+                        } else {
+                            link.style.backgroundImage = `url('Черный.png')`;
+                            link.style.backgroundSize = 'contain';
+                            link.style.backgroundRepeat = 'no-repeat';
+                        }
+
                         link.innerHTML = `<div class="play-btn"><svg viewBox="0 0 24 24"><path d="M8,5.14V19.14L19,12.14L8,5.14Z"/></svg></div>`;
                         container.appendChild(link);
                     });
+                } else {
+                    container.innerHTML = '<p>Новости временно недоступны</p>';
                 }
-            } catch (e) { console.log('Youtube error'); }
+            } catch (e) { 
+                console.log('VK error', e); 
+                container.innerHTML = '<p>Ошибка загрузки новостей</p>';
+            }
         }
-        document.addEventListener("DOMContentLoaded", loadVideos);
+        document.addEventListener("DOMContentLoaded", loadVkFeed);
 
         // --- 4. МЕНЮ ---
         function toggleMenu() {
