@@ -294,10 +294,10 @@
             
             /* ИСПРАВЛЕНИЕ: Уменьшенный шрифт для заголовков на телефоне */
             .slide-title { 
-                font-size: 2rem; /* Уменьшили с 2.8rem */
-                line-height: 1.2; 
-                word-wrap: break-word; /* Перенос слов */
-                hyphens: auto; /* Расстановка переносов */
+                font-size: 1.8rem; /* Ещё меньше для длинных слов */
+                line-height: 1.1; 
+                word-wrap: break-word; 
+                hyphens: auto; 
             }
             .slide-tag { font-size: 0.8rem; letter-spacing: 1px; }
             
@@ -391,12 +391,12 @@
     <div class="main-container" id="video-feed">
         <div class="info-block">
             <div class="section-header">
-                <h2 class="section-title">ВКонтакте</h2>
+                <h2 class="section-title">Видео</h2>
                 <a href="https://vk.com/yachurch" target="_blank" class="btn-outline">Группа ВК</a>
             </div>
-            <!-- Контейнер для ВК -->
-            <div class="video-grid" id="vk-container">
-                <p style="color:var(--text-secondary)">Загрузка новостей...</p>
+            <!-- Контейнер для Видео -->
+            <div class="video-grid" id="content-container">
+                <p style="color:var(--text-secondary)">Загрузка...</p>
             </div>
         </div>
     </div>
@@ -506,57 +506,81 @@
             sliderInterval = setInterval(() => moveSlide(1), 7000);
         });
 
-        // --- 3. VK RSS FETCH ---
-        // Используем RSS ленту сообщества
-        const vkRssUrl = `https://api.rss2json.com/v1/api.json?rss_url=https://vk.com/rss.php?domain=yachurch`;
+        // --- 3. СКРИПТ ЗАГРУЗКИ КОНТЕНТА (УМНЫЙ) ---
+        // Сначала пробуем ВК (ID группы: -202033194), если не вышло -> Ютуб
+        const vkRssUrl = `https://api.rss2json.com/v1/api.json?rss_url=https://vk.com/rss.php?oid=-202033194`;
+        const youtubeChannelID = "UCBZ_qrBtWpSAPhHmb9Mtp-A"; 
+        const youtubeRssUrl = `https://api.rss2json.com/v1/api.json?rss_url=https://www.youtube.com/feeds/videos.xml?channel_id=${youtubeChannelID}`;
         
-        async function loadVkFeed() {
-            const container = document.getElementById('vk-container');
+        async function loadContent() {
+            const container = document.getElementById('content-container');
+            
+            // 1. Попытка загрузить из ВК
             try {
-                const res = await fetch(vkRssUrl);
-                const data = await res.json();
-                if(data.status === 'ok') {
-                    container.innerHTML = '';
-                    // Берем первые 3 поста
-                    data.items.slice(0,3).forEach(item => {
-                        const link = document.createElement('a');
-                        link.className = 'video-card';
-                        link.href = item.link; 
-                        link.target = '_blank';
-                        
-                        // Пытаемся найти картинку в content или enclosure
-                        let imgUrl = '';
-                        if (item.enclosure && item.enclosure.link) {
-                            imgUrl = item.enclosure.link;
-                        } else {
-                            // Парсим описание на наличие img
-                            const div = document.createElement('div');
-                            div.innerHTML = item.description;
-                            const img = div.querySelector('img');
-                            if (img) imgUrl = img.src;
-                        }
+                const resVk = await fetch(vkRssUrl);
+                const dataVk = await resVk.json();
+                
+                if(dataVk.status === 'ok' && dataVk.items.length > 0) {
+                    renderCards(dataVk.items, container, 'vk');
+                    return; // Успех, выходим
+                }
+            } catch (e) { console.log('VK load failed, trying YouTube...'); }
 
-                        // Если картинки нет, ставим заглушку (логотип)
-                        if (imgUrl) {
-                            link.style.backgroundImage = `url('${imgUrl}')`;
-                        } else {
-                            link.style.backgroundImage = `url('Черный.png')`;
-                            link.style.backgroundSize = 'contain';
-                            link.style.backgroundRepeat = 'no-repeat';
-                        }
-
-                        link.innerHTML = `<div class="play-btn"><svg viewBox="0 0 24 24"><path d="M8,5.14V19.14L19,12.14L8,5.14Z"/></svg></div>`;
-                        container.appendChild(link);
-                    });
+            // 2. Фолбек на YouTube, если ВК не сработал
+            try {
+                const resYt = await fetch(youtubeRssUrl);
+                const dataYt = await resYt.json();
+                
+                if(dataYt.status === 'ok') {
+                    renderCards(dataYt.items, container, 'yt');
                 } else {
                     container.innerHTML = '<p>Новости временно недоступны</p>';
                 }
-            } catch (e) { 
-                console.log('VK error', e); 
-                container.innerHTML = '<p>Ошибка загрузки новостей</p>';
+            } catch (e) {
+                container.innerHTML = '<p>Ошибка загрузки</p>';
             }
         }
-        document.addEventListener("DOMContentLoaded", loadVkFeed);
+
+        function renderCards(items, container, source) {
+            container.innerHTML = '';
+            items.slice(0,3).forEach(item => {
+                const link = document.createElement('a');
+                link.className = 'video-card';
+                link.href = item.link; 
+                link.target = '_blank';
+                
+                let imgUrl = '';
+                
+                if (source === 'vk') {
+                    // Логика для ВК картинок
+                    if (item.enclosure && item.enclosure.link) {
+                        imgUrl = item.enclosure.link;
+                    } else {
+                        const div = document.createElement('div');
+                        div.innerHTML = item.description;
+                        const img = div.querySelector('img');
+                        if (img) imgUrl = img.src;
+                    }
+                } else {
+                    // Логика для YouTube
+                    imgUrl = item.thumbnail.replace('hqdefault', 'maxresdefault');
+                }
+
+                if (imgUrl) {
+                    link.style.backgroundImage = `url('${imgUrl}')`;
+                } else {
+                    // Заглушка
+                    link.style.backgroundImage = `url('Черный.png')`;
+                    link.style.backgroundSize = 'contain';
+                    link.style.backgroundRepeat = 'no-repeat';
+                }
+
+                link.innerHTML = `<div class="play-btn"><svg viewBox="0 0 24 24"><path d="M8,5.14V19.14L19,12.14L8,5.14Z"/></svg></div>`;
+                container.appendChild(link);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", loadContent);
 
         // --- 4. МЕНЮ ---
         function toggleMenu() {
