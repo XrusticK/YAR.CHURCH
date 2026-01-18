@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Ярославская церковь</title>
-    <link rel="icon" href="Черный.png" type="image/png">
+    <link rel="icon" href="Черный.png" type="image/png">
     
     <style>
         /* --- ГЛОБАЛЬНЫЕ НАСТРОЙКИ --- */
@@ -94,6 +94,8 @@
             background-color: var(--accent); color: var(--accent-text);
             padding: 12px 28px; border-radius: 50px;
             font-weight: 700; font-size: 0.9rem; transition: transform 0.2s;
+            display: inline-block; /* Для ссылок, которые выглядят как кнопки */
+            text-align: center;
         }
         .btn-donate:hover { transform: scale(1.05); }
 
@@ -119,8 +121,15 @@
             opacity: 0; transition: opacity 1s ease-in-out;
             display: flex; flex-direction: column; 
             align-items: center; justify-content: center; text-align: center;
+            pointer-events: none; /* Скрытые слайды некликабельны */
         }
-        .slide.active { opacity: 1; z-index: 1; }
+        .slide.active { opacity: 1; z-index: 1; pointer-events: auto; }
+        
+        /* Затемнение слайда для читаемости текста */
+        .slide::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4); z-index: 1;
+        }
 
         .slide-content { z-index: 2; padding: 0 20px; text-shadow: 0 2px 20px rgba(0,0,0,0.8); }
         .slide-tag { 
@@ -273,7 +282,7 @@
             .btn-donate { display: none; } 
             .footer-content { flex-direction: column; }
             .socials { justify-content: flex-start; }
-            .arrow-btn { display: none; }
+            .arrow-btn { display: none; } /* Скрываем стрелки на мобильном, оставляем автоплей */
         }
     </style>
 </head>
@@ -297,7 +306,7 @@
             <button class="burger-btn" onclick="toggleMenu()">
                 <span class="burger-line"></span><span class="burger-line"></span><span class="burger-line"></span>
             </button>
-            <a href="#top"><img src="Белый (1).png" alt="Лого" class="logo-img"></a>
+            <a href="#top"><img src="Белый (1).png" alt="Лого" class="logo-img"></a>
         </div>
 
         <nav class="desktop-nav">
@@ -316,19 +325,24 @@
 
     <div class="main-container">
         <div class="slider-container">
+            <!-- Слайд 1: Приветствие -->
             <div class="slide active" style="background-image: url('Церковь квадрат.png');">
                 <div class="slide-content">
                     <span class="slide-tag">Добро пожаловать</span>
                     <h2 class="slide-title">Ярославская<br>Церковь</h2>
                 </div>
             </div>
-            <div class="slide" style="background-image: linear-gradient(135deg, #00695C, #00BFA5);"> 
+            
+            <!-- Слайд 2: Рождество (НОВЫЙ) -->
+            <div class="slide" style="background-image: url('рождество.png');">
                 <div class="slide-content">
-                    <span class="slide-tag">Присоединяйтесь</span>
-                    <h2 class="slide-title">Время поста<br>и молитвы</h2>
+                    <span class="slide-tag">28 декабря</span>
+                    <h2 class="slide-title">Рождественская<br>программа</h2>
+                    <a href="https://vk.com/video-202033194_456239685" target="_blank" class="btn-donate" style="margin-top: 20px; text-decoration: none; display: inline-block;">Смотреть запись</a>
                 </div>
             </div>
             
+            <!-- Стрелки -->
             <button class="arrow-btn prev-btn" onclick="moveSlide(-1)">
                 <svg viewBox="0 0 24 24"><path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"/></svg>
             </button>
