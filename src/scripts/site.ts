@@ -1,5 +1,5 @@
 // Поведение страниц: шапка, анимации появления, бесконечный слайдер, лента дат,
-// начало субботы, галерея, копирование реквизитов.
+// ближайшее богослужение, галерея, копирование реквизитов.
 // Сайт переходит между страницами без перезагрузки, поэтому всё запускается на astro:page-load.
 
 type Meeting = { t: string; title: string; note?: string; badge?: string };
@@ -8,7 +8,7 @@ const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matc
 let cleanups: Array<() => void> = [];
 
 // ---------- Время по Москве ----------
-const LAT = 57.626, LON = 39.885, TZ = 3;
+const TZ = 3;
 const MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
 const MONTHS_SHORT = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
 const WD = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
@@ -18,48 +18,20 @@ const WD_FULL = ['воскресенье', 'понедельник', 'вторн
 const mskNow = () => new Date(Date.now() + TZ * 3600 * 1000);
 const addDays = (d: Date, n: number) => new Date(d.getTime() + n * 86400000);
 const fmtDate = (d: Date) => `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`;
-const fmtTime = (h: number) => { const m = Math.round(h * 60); return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`; };
 const toHours = (t: string) => { const [h, m] = t.split(':'); return +h + +m / 60; };
-
-// Закат по алгоритму из «Almanac for Computers» (точность ±1–2 мин)
-function sunset(d: Date) {
-  const rad = Math.PI / 180;
-  const n = Math.floor((Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - Date.UTC(d.getUTCFullYear(), 0, 0)) / 86400000);
-  const lngHour = LON / 15;
-  const t = n + (18 - lngHour) / 24;
-  const M = 0.9856 * t - 3.289;
-  const L = (M + 1.916 * Math.sin(M * rad) + 0.02 * Math.sin(2 * M * rad) + 282.634 + 360) % 360;
-  let RA = (Math.atan(0.91764 * Math.tan(L * rad)) / rad + 360) % 360;
-  RA = (RA + Math.floor(L / 90) * 90 - Math.floor(RA / 90) * 90) / 15;
-  const sinDec = 0.39782 * Math.sin(L * rad);
-  const cosDec = Math.cos(Math.asin(sinDec));
-  const cosH = (Math.cos(90.833 * rad) - sinDec * Math.sin(LAT * rad)) / (cosDec * Math.cos(LAT * rad));
-  const T = Math.acos(Math.max(-1, Math.min(1, cosH))) / rad / 15 + RA - 0.06571 * t - 6.622;
-  return ((T - lngHour) % 24 + 24 + TZ) % 24;
-}
 
 function setText(sel: string, text: string) {
   document.querySelectorAll<HTMLElement>(sel).forEach((el) => { el.textContent = text; });
 }
 
-function sabbathInfo() {
+// Ближайшее богослужение: суббота, 10:00
+function nextService() {
   const msk = mskNow();
   const day = msk.getUTCDay();
   const hour = msk.getUTCHours() + msk.getUTCMinutes() / 60;
-
   let toSat = (6 - day + 7) % 7;
   if (toSat === 0 && hour >= 13) toSat = 7;
   setText('[data-next-service]', `${toSat === 0 ? 'Сегодня' : toSat === 1 ? 'Завтра' : `Суббота, ${fmtDate(addDays(msk, toSat))}`}, 10:00`);
-
-  if ((day === 5 && hour >= sunset(msk)) || (day === 6 && hour < sunset(msk))) {
-    setText('[data-sabbath-label]', 'Суббота уже наступила');
-    setText('[data-sabbath]', `продлится до ${day === 5 ? 'завтра, ' : ''}${fmtTime(sunset(day === 6 ? msk : addDays(msk, 1)))}`);
-  } else {
-    const toFri = day === 6 ? 6 : (5 - day + 7) % 7;
-    const fri = addDays(msk, toFri);
-    setText('[data-sabbath-label]', 'Суббота начнётся');
-    setText('[data-sabbath]', `${toFri === 0 ? 'сегодня' : `в пятницу, ${fmtDate(fri)}`}, в ${fmtTime(sunset(fri))}`);
-  }
 }
 
 // ---------- Шапка ----------
@@ -323,7 +295,7 @@ document.addEventListener('astro:page-load', () => {
   parallax();
   slider();
   calendar();
-  sabbathInfo();
+  nextService();
   gallery();
   copy();
 });
