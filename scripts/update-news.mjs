@@ -10,6 +10,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { savePhoto, thumbPath } from './images.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = join(ROOT, 'src/data/news.json');
@@ -174,7 +175,8 @@ async function download(urls, id) {
     const name = `${String(i + 1).padStart(2, '0')}.jpg`;
     const file = join(dir, name);
     if (!existsSync(file)) {
-      try { writeFileSync(file, await get(url, true)); } catch (e) { console.warn(`  не скачалось: ${e.message}`); continue; }
+      // сразу сжимаем: полное фото до 1600 px и превью 640 px
+      try { await savePhoto(await get(url, true), file); } catch (e) { console.warn(`  не скачалось: ${e.message}`); continue; }
     }
     paths.push(`/img/news/${id}/${name}`);
   }
@@ -201,7 +203,7 @@ async function main() {
   }
 
   const wall = await vkWall().catch((e) => { console.warn(`  ВК недоступен: ${e.message}`); return []; });
-  const onDisk = (paths) => paths?.length > 0 && paths.every((p) => existsSync(join(ROOT, 'public', p)));
+  const onDisk = (paths) => paths?.length > 0 && paths.every((p) => existsSync(join(ROOT, 'public', p)) && existsSync(join(ROOT, 'public', thumbPath(p))));
 
   const posts = new Map(old);
   for (const m of msgs) {

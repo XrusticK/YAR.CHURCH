@@ -3,7 +3,7 @@ import { url } from '../../lib/url';
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import NewsCard from '../../components/NewsCard.astro';
-import { NEWS, formatDate, tagLabel, type Post } from '../../data/news';
+import { NEWS, formatDate, tagLabel, thumb, type Post } from '../../data/news';
 
 export function getStaticPaths() {
   return NEWS.map((post) => ({ params: { id: String(post.id) }, props: { post } }));
@@ -43,7 +43,7 @@ const arrow = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
             <div class="section-head" data-reveal><h2 class="h2">Фотографии</h2></div>
             <div class="gallery" data-gallery>
               {post.photos.map((src, i) => (
-                <button type="button" data-src={url(src)} aria-label={`Открыть фото ${i + 1}`}><img src={url(src)} alt="" loading="lazy"></button>
+                <button type="button" data-src={url(src)} aria-label={`Открыть фото ${i + 1}`}><img src={url(thumb(src))} alt="" loading="lazy" decoding="async"></button>
               ))}
             </div>
           </div>

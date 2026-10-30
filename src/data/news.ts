@@ -33,3 +33,6 @@ const TAGS: Record<string, string> = {
   служениездоровья: 'Здоровье',
 };
 export const tagLabel = (t: string) => TAGS[t] || '';
+
+// Превью фото (640 px), его делает scripts/images.mjs рядом с полным файлом
+export const thumb = (p: string) => p.replace(/\.jpe?g$/i, '-sm.jpg');
