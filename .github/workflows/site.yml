@@ -1,4 +1,4 @@
-# Обновляет новости и трансляцию и публикует сайт на GitHub Pages.
+# Обновляет новости и трансляцию и публикует сайт на GitHub Pages и (если настроено) на хостинг Timeweb по FTP.
 #   Новости (Telegram + фото из ВК) — раз в день.
 #   Трансляция с Rutube — каждый день вместе с новостями и каждые 10 минут по субботам с 9:00 до 13:00 по Москве.
 # Ключ ВК хранится в Settings → Secrets and variables → Actions → VK_TOKEN.
@@ -92,3 +92,49 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Выгрузка на хостинг Timeweb по FTP. Включается сама, когда в секретах репозитория есть TIMEWEB_FTP_HOST.
+  # Секреты: TIMEWEB_FTP_HOST, TIMEWEB_FTP_USER, TIMEWEB_FTP_PASSWORD, TIMEWEB_FTP_DIR (папка сайта, например имя_сайта/public_html)
+  # Переменная (Variables): SITE_URL — адрес сайта, например https://yar-church.ru
+  timeweb:
+    needs: build
+    if: needs.build.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    env:
+      FTP_HOST: ${{ secrets.TIMEWEB_FTP_HOST }}
+      FTP_USER: ${{ secrets.TIMEWEB_FTP_USER }}
+      FTP_PASSWORD: ${{ secrets.TIMEWEB_FTP_PASSWORD }}
+      FTP_DIR: ${{ secrets.TIMEWEB_FTP_DIR }}
+    steps:
+      - name: Проверка настроек Timeweb
+        id: cfg
+        run: |
+          if [ -n "$FTP_HOST" ]; then echo "on=true" >> "$GITHUB_OUTPUT"; else echo "on=false" >> "$GITHUB_OUTPUT"; echo "TIMEWEB_FTP_HOST не задан — выгрузка на Timeweb пропущена"; fi
+
+      # берём ветку уже с обновлёнными новостями из job build
+      - uses: actions/checkout@v4
+        if: steps.cfg.outputs.on == 'true'
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        if: steps.cfg.outputs.on == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Сборка для своего домена (в корне)
+        if: steps.cfg.outputs.on == 'true'
+        run: npm ci && npm run build
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          BASE_PATH: /
+
+      - name: Выгрузка по FTP
+        if: steps.cfg.outputs.on == 'true'
+        run: |
+          sudo apt-get update -qq >/dev/null && sudo apt-get install -y -qq lftp >/dev/null
+          lftp -u "$FTP_USER,$FTP_PASSWORD" "$FTP_HOST" -e "
+            set ftp:ssl-allow yes; set ssl:verify-certificate no; set net:max-retries 3;
+            mirror --reverse --delete --parallel=4 --no-perms --verbose=1 dist/ ${FTP_DIR:-public_html};
+            quit"

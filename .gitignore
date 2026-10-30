@@ -5,3 +5,4 @@ dist/
 _old/
 .claude/
 .DS_Store
+release/

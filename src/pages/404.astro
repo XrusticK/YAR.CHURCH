@@ -1,0 +1,18 @@
+---
+import { url } from '../lib/url';
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+const arrow = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+---
+<Base title="Страница не найдена" description="Такой страницы на сайте нет.">
+  <PageHero title="Страница не найдена" lead="Возможно, ссылка устарела или в адресе опечатка." variant="dark" />
+  <div class="sheet">
+    <section class="section">
+      <div class="container actions">
+        <a class="btn btn--fill" href={url('/')}>На главную <Fragment set:html={arrow} /></a>
+        <a class="btn btn--outline" href={url('/schedule')}>Расписание</a>
+        <a class="btn btn--outline" href={url('/contacts')}>Контакты</a>
+      </div>
+    </section>
+  </div>
+</Base>

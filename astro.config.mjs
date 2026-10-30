@@ -4,7 +4,8 @@ import { defineConfig } from 'astro/config';
 // SITE_URL и BASE_PATH подставляет сборка на GitHub (.github/workflows/site.yml);
 // локально сайт открывается в корне. Со своим доменом BASE_PATH станет пустым — ничего менять не нужно.
 export default defineConfig({
-  site: process.env.SITE_URL || 'https://xrustick.github.io',
+  // адрес сайта нужен только для картинки-превью в соцсетях; без него ссылка на неё будет относительной
+  site: process.env.SITE_URL || undefined,
   base: process.env.BASE_PATH || '/',
   trailingSlash: 'ignore',
   build: { format: 'directory' },

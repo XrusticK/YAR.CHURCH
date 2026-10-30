@@ -31,7 +31,7 @@ const ld = {
   <meta name="description" content={description}>
   <meta property="og:title" content={fullTitle}>
   <meta property="og:description" content={description}>
-  <meta property="og:image" content={new URL(url(image), Astro.site).href}>
+  <meta property="og:image" content={Astro.site ? new URL(url(image), Astro.site).href : url(image)}>
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" type="image/png" sizes="48x48" href={url("/favicon-48.png")}>
