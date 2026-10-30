@@ -1,0 +1,22 @@
+---
+import { url } from '../lib/url';
+import type { Post } from '../data/news';
+import { formatDate, tagLabel } from '../data/news';
+interface Props { post: Post; delay?: number }
+const { post, delay = 0 } = Astro.props;
+const label = post.tags.map(tagLabel).find(Boolean);
+---
+<a class="news-card" href={url(`/news/${post.id}`)} data-reveal style={`--d:${delay}ms`}>
+  {post.photos.length
+    ? <div class="news-card__img">
+        <img src={url(post.photos[0])} alt="" loading="lazy">
+        {post.photos.length > 1 && <span class="news-card__count">{post.photos.length} фото</span>}
+      </div>
+    : <div class="news-card__img news-card__img--empty"><img src={url("/img/logo-mark-white.png")} alt=""></div>}
+  <div class="news-card__meta">
+    <time datetime={post.date}>{formatDate(post.date)}</time>
+    {label && <span class="news-card__tag">{label}</span>}
+  </div>
+  <h3 class="news-card__title">{post.title}</h3>
+  <p class="news-card__excerpt">{post.excerpt}</p>
+</a>

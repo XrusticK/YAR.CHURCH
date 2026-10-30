@@ -1,0 +1,45 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import SocialIcon from '../components/SocialIcon.astro';
+import { SOCIALS } from '../data/site';
+import { STREAM } from '../data/stream';
+---
+<Base title="Онлайн" description="Трансляции субботних богослужений Ярославской церкви на YouTube, Rutube и ВКонтакте.">
+  <PageHero title="Богослужение из дома" lead="Трансляция богослужения — каждую субботу с 10:00." variant="warm" />
+
+  <div class="sheet">
+    <section class="section">
+      <div class="container">
+        <div class="online" data-reveal>
+          <div>
+            <span class="live"><span class="live__dot"></span>{STREAM.isLive ? 'Сейчас в эфире' : 'Суббота, с 10:00'}</span>
+            <h2 class="h2">{STREAM.isLive ? 'Идёт трансляция' : 'Последняя трансляция'}</h2>
+            {STREAM.title && <p class="online__now"><a href={STREAM.url}>{STREAM.title}</a></p>}
+            <p>Прямой эфир идёт одновременно на YouTube, Rutube и во ВКонтакте. Видео здесь обновляется само.</p>
+            <div class="pills">
+              <a class="pill" href={SOCIALS.youtube}><SocialIcon name="youtube" size={16} />YouTube</a>
+              <a class="pill" href={SOCIALS.rutube}><SocialIcon name="rutube" size={16} />Rutube</a>
+              <a class="pill" href={SOCIALS.vk}><SocialIcon name="vk" size={16} />ВКонтакте</a>
+            </div>
+          </div>
+          <div class="video">
+            {STREAM.embed && <iframe src={STREAM.embed} title={STREAM.title} loading="lazy" allow="clipboard-write; autoplay" allowfullscreen></iframe>}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="section-head" data-reveal><div><span class="eyebrow">Площадки</span><h2 class="h2">Где смотреть</h2></div></div>
+        <div class="platforms">
+          <a class="platform" href={SOCIALS.youtube} data-reveal><SocialIcon name="youtube" size={28} /><span class="platform__name">YouTube</span><p>Трансляции и архив проповедей</p></a>
+          <a class="platform" href={SOCIALS.rutube} data-reveal style="--d:80ms"><SocialIcon name="rutube" size={28} /><span class="platform__name">Rutube</span><p>Трансляции и записи богослужений</p></a>
+          <a class="platform" href={SOCIALS.vk} data-reveal style="--d:160ms"><SocialIcon name="vk" size={28} /><span class="platform__name">ВКонтакте</span><p>Трансляции, фотоальбомы и новости</p></a>
+          <a class="platform" href={SOCIALS.telegram} data-reveal style="--d:240ms"><SocialIcon name="telegram" size={28} /><span class="platform__name">Telegram</span><p>Анонсы, детские истории, аудио</p></a>
+        </div>
+      </div>
+    </section>
+  </div>
+</Base>

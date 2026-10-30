@@ -1,0 +1,47 @@
+---
+import { url } from '../lib/url';
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Calendar from '../components/Calendar.astro';
+import { WEEK, MONTHLY, DAY_NAMES } from '../data/schedule';
+
+// Порядок карточек: суббота крупно, потом остальные дни недели
+const days = [6, 0, 1, 2, 3, 4, 5].filter((d) => WEEK[d]?.length);
+---
+<Base title="Расписание" description="Расписание богослужений и встреч Ярославской церкви адвентистов седьмого дня: суббота, вторник, четверг.">
+  <PageHero title="Расписание" lead="Главная встреча недели — суббота. Можно прийти к началу или к любой части." variant="dark" />
+
+  <div class="sheet">
+    <section class="section">
+      <div class="container">
+        <div class="week">
+          {days.map((d, i) => (
+            <article class:list={['week__day', d === 6 && 'week__day--main']} data-reveal style={`--d:${i * 80}ms`}>
+              <h2 class="h3">{DAY_NAMES[d]}</h2>
+              <ul class="week__list">
+                {WEEK[d].map((m) => (
+                  <li><time>{m.t}</time><span>{m.title}{m.note && <small>{m.note}</small>}</span></li>
+                ))}
+              </ul>
+            </article>
+          ))}
+          <article class="week__day" data-reveal style={`--d:${days.length * 80}ms`}>
+            <h2 class="h3">Раз в месяц</h2>
+            <ul class="week__list">
+              {MONTHLY.map((m) => <li style="grid-template-columns:1fr"><span><b>{m.title}</b><small>{m.text}</small></span></li>)}
+            </ul>
+            <p class="note">Даты публикуем в <a href={url("/news")}>новостях</a> и Telegram-канале.</p>
+          </article>
+        </div>
+        <p class="note" data-reveal>Суббота начинается в пятницу на закате. <span data-sabbath-label>Суббота начнётся</span> <span data-sabbath></span>.</p>
+      </div>
+    </section>
+
+    <section class="section section--soft">
+      <div class="container">
+        <div class="section-head" data-reveal><div><span class="eyebrow">Календарь</span><h2 class="h2">Ближайшие встречи</h2></div></div>
+        <div data-reveal><Calendar /></div>
+      </div>
+    </section>
+  </div>
+</Base>

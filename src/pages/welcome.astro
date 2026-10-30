@@ -1,0 +1,75 @@
+---
+import { url } from '../lib/url';
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { SITE } from '../data/site';
+const arrow = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+const faq = [
+  ['Почему вы собираетесь в субботу?', 'Четвёртая заповедь говорит: «Помни день субботний, чтобы святить его». Мы верим, что суббота — подарок Бога человеку: день отдыха, общения с Ним и с близкими. Она начинается в пятницу на закате и длится до заката субботы.'],
+  ['Нужно ли быть членом церкви, чтобы прийти?', 'Нет. На богослужения приходят все, кто хочет: верующие, сомневающиеся, просто интересующиеся. Никто не будет требовать от вас решений или обязательств.'],
+  ['Нужно ли платить за вход?', 'Нет, вход всегда свободный. Пожертвования церковь принимает только добровольные.'],
+  ['Можно ли изучать Библию с нуля?', 'Да. Для этого есть Школа Библии по субботам в 10:00 и разбор урока по четвергам в 19:00 — вам помогут и подскажут, с чего начать.'],
+  ['Можно ли поговорить с пастором лично?', 'Конечно. Подойдите после богослужения или напишите заранее в Telegram.'],
+];
+---
+<Base title="Впервые у нас" description="Что вас ждёт на субботнем богослужении в Ярославской церкви: как проходит служение, во что одеться, что с детьми, как добраться.">
+  <PageHero title="Впервые у нас?" lead="Прийти в незнакомую церковь непросто. Вот что полезно знать заранее." variant="teal" />
+
+  <div class="sheet">
+    <section class="section">
+      <div class="container">
+        <div class="cards cards--4">
+          <div class="card" data-reveal>
+            <span class="card__icon"><svg viewBox="0 0 24 24"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Zm0 0A2 2 0 0 0 6 22h13"/></svg></span>
+            <h3 class="h3">Как проходит служение</h3>
+            <p>Богослужение начинается в 10:00 с субботней школы — изучения Библии в небольших группах. В 12:00 — пение, молитва и проповедь. Можно просто слушать.</p>
+          </div>
+          <div class="card" data-reveal style="--d:80ms">
+            <span class="card__icon"><svg viewBox="0 0 24 24"><path d="M20.4 14.5 16 10 4 20"/><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="8" cy="10" r="2"/></svg></span>
+            <h3 class="h3">Во что одеться</h3>
+            <p>Дресс-кода нет. Большинство приходит в аккуратной повседневной или праздничной одежде — как вам удобно.</p>
+          </div>
+          <div class="card" data-reveal style="--d:160ms">
+            <span class="card__icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg></span>
+            <h3 class="h3">Если вы с детьми</h3>
+            <p>Дети — желанные гости. По субботам в 15:00 работают клубы «Искатель» и «Следопыт».</p>
+          </div>
+          <div class="card" data-reveal style="--d:240ms">
+            <span class="card__icon"><svg viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+            <h3 class="h3">Как добраться</h3>
+            <p>{SITE.address}. Остановка {SITE.transport}.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--soft">
+      <div class="container">
+        <div class="section-head" data-reveal><div><span class="eyebrow">Ответы</span><h2 class="h2">Частые вопросы</h2></div></div>
+        <div class="faq">
+          {faq.map(([q, a], i) => (
+            <details open={i === 0} data-reveal style={`--d:${i * 60}ms`}>
+              <summary>{q}</summary>
+              <p>{a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="online" style="background:var(--accent)" data-reveal>
+          <div>
+            <h2 class="h2" style="margin-top:0">Ждём вас в субботу</h2>
+            <p>Начало богослужения в 10:00, проповедь в 12:00. Если не получается прийти — смотрите трансляцию.</p>
+          </div>
+          <div class="actions" style="justify-content:flex-end">
+            <a class="btn btn--white" href={url("/contacts")}>Как добраться <Fragment set:html={arrow} /></a>
+            <a class="btn btn--glass" href={url("/online")}>Смотреть онлайн</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</Base>

@@ -1,0 +1,14 @@
+---
+// Лента дат на три недели вперёд; встречи берутся из src/data/schedule.ts
+import { WEEK } from '../data/schedule';
+import { SITE } from '../data/site';
+---
+<div class="cal" data-calendar data-week={JSON.stringify(WEEK)} data-place={SITE.address}>
+  <div class="cal__bar">
+    <button class="round-btn" type="button" data-cal-scroll="-1" aria-label="Раньше"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+    <div class="cal__strip" role="group" aria-label="Выберите день"></div>
+    <button class="round-btn" type="button" data-cal-scroll="1" aria-label="Позже"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+  </div>
+  <p class="cal__head" aria-live="polite"></p>
+  <div class="cal__list"></div>
+</div>

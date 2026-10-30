@@ -1,0 +1,21 @@
+---
+import { SITE } from '../data/site';
+interface Props { title?: string }
+const { title = 'Как нас найти' } = Astro.props;
+---
+<section class="map" aria-label="Карта">
+  <iframe src={SITE.mapWidget} title="Церковь на карте Ярославля" loading="lazy" allowfullscreen></iframe>
+  <div class="container">
+    <div class="map__panel" data-reveal>
+      <h2 class="h3">{title}</h2>
+      <slot>
+        <dl class="info">
+          <div><dt>Адрес</dt><dd>{SITE.city}, {SITE.address}</dd></div>
+          <div><dt>Остановка</dt><dd>{SITE.transport}</dd></div>
+          <div><dt>Телефон</dt><dd><a href={SITE.phoneHref}>{SITE.phone}</a></dd></div>
+        </dl>
+      </slot>
+      <a class="btn btn--fill" href={SITE.routeUrl}>Построить маршрут<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+  </div>
+</section>

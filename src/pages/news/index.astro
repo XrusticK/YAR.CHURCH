@@ -1,0 +1,22 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import NewsCard from '../../components/NewsCard.astro';
+import { NEWS } from '../../data/news';
+import { SOCIALS } from '../../data/site';
+---
+<Base title="Новости" description="Новости Ярославской церкви адвентистов седьмого дня: праздники, встречи, поездки, клубы для детей и молодёжь.">
+  <PageHero title="Новости" lead="Что происходит в жизни церкви — с фотографиями." image={NEWS[0]?.photos[0] || '/img/church.jpg'} />
+
+  <div class="sheet">
+    <section class="section">
+      <div class="container">
+        {NEWS.length
+          ? <div class:list={['news-grid', NEWS.length > 3 && 'news-grid--featured']}>
+              {NEWS.map((post, i) => <NewsCard post={post} delay={(i % 3) * 100} />)}
+            </div>
+          : <p class="lead">Новостей пока нет. Следите за жизнью церкви в <a href={SOCIALS.telegram}>Telegram</a>.</p>}
+      </div>
+    </section>
+  </div>
+</Base>

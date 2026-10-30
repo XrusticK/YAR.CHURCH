@@ -1,0 +1,79 @@
+---
+import { url } from '../../lib/url';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import NewsCard from '../../components/NewsCard.astro';
+import { NEWS, formatDate, tagLabel, type Post } from '../../data/news';
+
+export function getStaticPaths() {
+  return NEWS.map((post) => ({ params: { id: String(post.id) }, props: { post } }));
+}
+
+const { post } = Astro.props as { post: Post };
+const others = NEWS.filter((p) => p.id !== post.id).slice(0, 3);
+const label = post.tags.map(tagLabel).find(Boolean);
+const [lead, ...rest] = post.blocks;
+const arrow = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+---
+<Base title={post.title} description={post.excerpt} image={post.photos[0]}>
+  <PageHero
+    title={post.title}
+    image={post.photos[0]}
+    variant="teal"
+    crumbs={[{ href: '/news', label: 'Новости' }]}
+  />
+
+  <div class="sheet">
+    <section class="section">
+      <article class="container">
+        <div class="article">
+          <div class="article__meta" data-reveal>
+            <time datetime={post.date}>{formatDate(post.date)}</time>
+            {label && <span class="news-card__tag">{label}</span>}
+            {post.photos.length > 0 && <span>{post.photos.length} фото</span>}
+          </div>
+          {lead && lead.type === 'p' && <p class="article__lead" data-reveal>{lead.text}</p>}
+          {rest.map((b) => b.type === 'quote'
+            ? <blockquote data-reveal>{b.text}<cite>{b.cite}</cite></blockquote>
+            : <p data-reveal>{b.text}</p>)}
+        </div>
+
+        {post.photos.length > 1 && (
+          <div style="margin-top:56px">
+            <div class="section-head" data-reveal><h2 class="h2">Фотографии</h2></div>
+            <div class="gallery" data-gallery>
+              {post.photos.map((src, i) => (
+                <button type="button" data-src={url(src)} aria-label={`Открыть фото ${i + 1}`}><img src={url(src)} alt="" loading="lazy"></button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div class="article actions" style="margin-top:48px" data-reveal>
+          <a class="btn btn--fill" href={post.album}>Весь альбом во ВКонтакте <Fragment set:html={arrow} /></a>
+          <a class="btn btn--outline" href={post.source}>Пост в Telegram</a>
+        </div>
+      </article>
+    </section>
+
+    {others.length > 0 && (
+      <section class="section section--soft">
+        <div class="container">
+          <div class="section-head" data-reveal>
+            <h2 class="h2">Другие новости</h2>
+            <a class="btn btn--outline" href={url("/news")}>Все новости <Fragment set:html={arrow} /></a>
+          </div>
+          <div class="news-grid">{others.map((p, i) => <NewsCard post={p} delay={i * 100} />)}</div>
+        </div>
+      </section>
+    )}
+  </div>
+
+  <div class="lightbox" data-lightbox role="dialog" aria-label="Просмотр фото">
+    <img alt="">
+    <button class="round-btn lightbox__close" type="button" aria-label="Закрыть"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <button class="round-btn lightbox__prev" type="button" aria-label="Предыдущее"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+    <button class="round-btn lightbox__next" type="button" aria-label="Следующее"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+    <span class="lightbox__count"></span>
+  </div>
+</Base>

@@ -1,0 +1,27 @@
+---
+import { url } from '../lib/url';
+// Шапка внутренней страницы: фото или цветной фон, хлебные крошки, заголовок с анимацией
+interface Props {
+  title: string;
+  lead?: string;
+  image?: string;
+  imagePosition?: string;
+  variant?: 'teal' | 'warm' | 'dark';
+  crumbs?: { href: string; label: string }[];
+}
+const { title, lead, image, imagePosition = '50% 40%', variant = 'teal', crumbs = [] } = Astro.props;
+---
+<section class:list={['page-hero', !image && `page-hero--${variant}`]}>
+  {image
+    ? <img class="page-hero__bg" src={url(image)} alt="" style={`object-position:${imagePosition}`} data-parallax>
+    : <img class="slide__mark" src={url("/img/logo-mark-white.png")} alt="">}
+  <div class="container">
+    <nav class="crumbs page-hero__fade" aria-label="Хлебные крошки">
+      <a href={url("/")}>Главная</a>
+      {crumbs.map((c) => <a href={url(c.href)}><span>{c.label}</span></a>)}
+      <span>{title}</span>
+    </nav>
+    <h1 class="page-hero__title"><span class="mask"><span style="--d:120ms">{title}</span></span></h1>
+    {lead && <p class="page-hero__lead page-hero__fade" style="--d:350ms">{lead}</p>}
+  </div>
+</section>

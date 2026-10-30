@@ -1,0 +1,55 @@
+---
+import { url } from '../lib/url';
+import { ClientRouter } from 'astro:transitions';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE, SOCIALS } from '../data/site';
+import '../styles/global.css';
+
+interface Props { title?: string; description?: string; image?: string }
+const {
+  title,
+  description = 'Церковь христиан адвентистов седьмого дня в Ярославле. Субботние богослужения, изучение Библии, клубы для детей, молодёжь, трансляции. Ул. Большая Фёдоровская, 111.',
+  image = '/img/church.jpg',
+} = Astro.props;
+const fullTitle = title ? `${title} — ${SITE.name}` : `${SITE.name} — адвентисты седьмого дня, Большая Фёдоровская, 111`;
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'Church',
+  name: 'Церковь христиан адвентистов седьмого дня г. Ярославля',
+  address: { '@type': 'PostalAddress', streetAddress: SITE.address, addressLocality: 'Ярославль', postalCode: SITE.zip, addressCountry: 'RU' },
+  telephone: SITE.phone,
+  sameAs: Object.values(SOCIALS),
+};
+---
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{fullTitle}</title>
+  <meta name="description" content={description}>
+  <meta property="og:title" content={fullTitle}>
+  <meta property="og:description" content={description}>
+  <meta property="og:image" content={new URL(url(image), Astro.site).href}>
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" type="image/png" href={url("/img/logo-mark-black.png")}>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=Unbounded:wght@600;700;800&display=swap">
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+  <ClientRouter />
+</head>
+<body>
+  <a class="skip" href="#main">Перейти к содержанию</a>
+  <Header />
+  <main id="main">
+    <slot />
+  </main>
+  <Footer />
+  <script>
+    import '../scripts/site.ts';
+  </script>
+</body>
+</html>

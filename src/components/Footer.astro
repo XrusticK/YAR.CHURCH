@@ -1,0 +1,29 @@
+---
+import { url } from '../lib/url';
+import SocialIcon from './SocialIcon.astro';
+import { NAV, SITE, SOCIALS } from '../data/site';
+---
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <a class="site-footer__brand" href={url("/")}>
+        <img src={url("/img/logo-mark-white.png")} alt="" width="72" height="46">
+        <span class="logo__text">Ярославская<br>церковь</span>
+      </a>
+      <nav class="site-footer__nav" aria-label="Меню в подвале">
+        {NAV.map((n) => <a href={url(n.href)}>{n.label}</a>)}
+        <a href={url("/donate")}>Пожертвовать</a>
+      </nav>
+      <div class="socials">
+        <a href={SOCIALS.telegram} aria-label="Telegram"><SocialIcon name="telegram" /></a>
+        <a href={SOCIALS.vk} aria-label="ВКонтакте"><SocialIcon name="vk" /></a>
+        <a href={SOCIALS.youtube} aria-label="YouTube"><SocialIcon name="youtube" /></a>
+        <a href={SOCIALS.rutube} aria-label="Rutube"><SocialIcon name="rutube" /></a>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <p>© {new Date().getFullYear()} {SITE.legal}. ИНН {SITE.inn}, ОГРН {SITE.ogrn}.</p>
+      <p>{SITE.city}, {SITE.address}</p>
+    </div>
+  </div>
+</footer>

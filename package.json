@@ -1,0 +1,20 @@
+{
+  "name": "yar-church",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev --port 4321",
+    "update:news": "node scripts/update-news.mjs",
+    "update:stream": "node scripts/update-stream.mjs",
+    "update": "node scripts/update-news.mjs --soft && node scripts/update-stream.mjs --soft",
+    "build": "astro build",
+    "preview": "astro preview --port 4321"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "astro": "5.18.2"
+  }
+}

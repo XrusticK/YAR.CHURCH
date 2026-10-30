@@ -1,0 +1,94 @@
+# Обновляет новости и трансляцию и публикует сайт на GitHub Pages.
+#   Новости (Telegram + фото из ВК) — раз в день.
+#   Трансляция с Rutube — каждый день вместе с новостями и каждые 10 минут по субботам с 9:00 до 13:00 по Москве.
+# Ключ ВК хранится в Settings → Secrets and variables → Actions → VK_TOKEN.
+name: Обновление и публикация сайта
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * *'        # каждый день в 6:00 по Москве
+    - cron: '*/10 6-9 * * 6'   # суббота, 9:00–12:50 по Москве
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.save.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Новости из Telegram и ВК
+        if: github.event_name != 'schedule' || github.event.schedule == '0 3 * * *'
+        run: node scripts/update-news.mjs --soft
+        env:
+          VK_TOKEN: ${{ secrets.VK_TOKEN }}
+
+      - name: Трансляция с Rutube
+        run: node scripts/update-stream.mjs --soft
+
+      - name: Сохранить обновления в репозитории
+        id: save
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data public/img/news
+          if git diff --cached --quiet; then
+            changed=false
+          else
+            git commit -m "Обновление новостей и трансляции"
+            git push
+            changed=true
+          fi
+          # частые субботние проверки публикуют сайт, только если трансляция сменилась
+          if [ "${{ github.event.schedule }}" = "*/10 6-9 * * 6" ] && [ "$changed" = "false" ]; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Адрес сайта на GitHub Pages
+        id: pages
+        if: steps.save.outputs.publish == 'true'
+        uses: actions/configure-pages@v5
+
+      - name: Сборка
+        if: steps.save.outputs.publish == 'true'
+        run: npm run build
+        env:
+          SITE_URL: ${{ steps.pages.outputs.origin }}
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.save.outputs.publish == 'true'
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

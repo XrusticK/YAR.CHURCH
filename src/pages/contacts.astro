@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import MapBlock from '../components/MapBlock.astro';
+import { SITE, SOCIALS } from '../data/site';
+---
+<Base title="Контакты" description="Адрес, телефон и как добраться до Ярославской церкви адвентистов седьмого дня: ул. Большая Фёдоровская, 111.">
+  <PageHero title="Контакты" lead={`${SITE.city}, ${SITE.address}`} variant="teal" />
+
+  <div class="sheet">
+    <section class="section">
+      <div class="container">
+        <div class="cards cards--4">
+          <div class="card" data-reveal><span class="card__label">Адрес</span><h3 class="h3">Большая Фёдоровская, 111</h3><p>{SITE.city}, {SITE.zip}</p></div>
+          <a class="card" href={SITE.phoneHref} data-reveal style="--d:80ms"><span class="card__label">Телефон</span><h3 class="h3">{SITE.phone}</h3><p>Звоните по любым вопросам</p></a>
+          <a class="card" href={SITE.pastorTelegram} data-reveal style="--d:160ms"><span class="card__label">Пастор</span><h3 class="h3">Telegram</h3><p>{SITE.pastor}</p></a>
+          <div class="card" data-reveal style="--d:240ms"><span class="card__label">Транспорт</span><h3 class="h3">«Улица Карабулина»</h3><p>350 м пешком. Рядом — «Которосль», «Комсомольская площадь».</p></div>
+        </div>
+      </div>
+    </section>
+
+    <MapBlock title="Мы в соцсетях">
+      <dl class="info">
+        <div><dt>Telegram</dt><dd><a href={SOCIALS.telegram}>t.me/yachurch</a></dd></div>
+        <div><dt>ВКонтакте</dt><dd><a href={SOCIALS.vk}>vk.com/yachurch</a></dd></div>
+        <div><dt>YouTube</dt><dd><a href={SOCIALS.youtube}>Трансляции и проповеди</a></dd></div>
+        <div><dt>Rutube</dt><dd><a href={SOCIALS.rutube}>Трансляции богослужений</a></dd></div>
+      </dl>
+    </MapBlock>
+  </div>
+</Base>

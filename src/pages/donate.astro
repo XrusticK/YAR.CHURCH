@@ -1,0 +1,48 @@
+---
+import { url } from '../lib/url';
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { DONATE } from '../data/site';
+---
+<Base title="Пожертвовать" description="Добровольные пожертвования Ярославской церкви адвентистов седьмого дня через QR-код в приложении любого банка или по реквизитам.">
+  <PageHero title="Поддержать церковь" lead="Пожертвования только добровольные. Спасибо, что вы с нами." image="/img/church.jpg" imagePosition="50% 65%" />
+
+  <div class="sheet">
+    <section class="section">
+      <div class="container">
+        <div class="donate" data-reveal>
+          <div class="donate__text">
+            <span class="eyebrow" style="color:rgba(255,255,255,.7)">Через QR-код</span>
+            <h2 class="h2">В приложении любого банка</h2>
+            <p>Пожертвования идут на содержание дома молитвы, служение детям и молодёжи и помощь тем, кто в ней нуждается.</p>
+            <ol class="steps">
+              <li><span>Откройте приложение своего банка и отсканируйте QR-код</span></li>
+              <li><span>Назначение платежа подставится само:<b>«{DONATE.purpose}»</b></span></li>
+              <li><span>Введите сумму и подтвердите платёж</span></li>
+            </ol>
+          </div>
+          <div class="donate__qr">
+            <img src={url("/img/qr.png")} alt={`QR-код для пожертвования: ${DONATE.recipient}, р/с ${DONATE.account}, БИК ${DONATE.bik}`}>
+            <span class="donate__qr-cap">Наведите камеру в приложении банка</span>
+            <span class="donate__qr-hint">В следующий раз платёж можно повторить из «Истории платежей». Банк может взять комиссию за перевод.</span>
+          </div>
+        </div>
+
+        <div class="requisites" data-reveal>
+          <h2 class="h3">Реквизиты для перевода вручную</h2>
+          <dl class="req">
+            <div class="req__wide"><dt>Получатель</dt><dd>{DONATE.recipient}</dd></div>
+            <div><dt>ИНН</dt><dd><button class="copy" type="button">{DONATE.inn}</button></dd></div>
+            <div><dt>КПП</dt><dd><button class="copy" type="button">{DONATE.kpp}</button></dd></div>
+            <div><dt>Расчётный счёт</dt><dd><button class="copy" type="button">{DONATE.account}</button></dd></div>
+            <div><dt>БИК</dt><dd><button class="copy" type="button">{DONATE.bik}</button></dd></div>
+            <div><dt>Корр. счёт</dt><dd><button class="copy" type="button">{DONATE.corr}</button></dd></div>
+            <div><dt>Банк</dt><dd>{DONATE.bank}</dd></div>
+            <div class="req__wide"><dt>Назначение</dt><dd><button class="copy" type="button">{DONATE.purpose}</button></dd></div>
+          </dl>
+          <p class="note">Нажмите на значение, чтобы скопировать.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</Base>

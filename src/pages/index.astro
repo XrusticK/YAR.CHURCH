@@ -1,0 +1,183 @@
+---
+import { url } from '../lib/url';
+import Base from '../layouts/Base.astro';
+import Calendar from '../components/Calendar.astro';
+import NewsCard from '../components/NewsCard.astro';
+import MapBlock from '../components/MapBlock.astro';
+import SocialIcon from '../components/SocialIcon.astro';
+import { SITE, SOCIALS } from '../data/site';
+import { NEWS } from '../data/news';
+import { STREAM } from '../data/stream';
+
+const latest = NEWS.slice(0, 3);
+const arrow = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+---
+<Base>
+  <!-- Бесконечный слайдер -->
+  <section class="hero" aria-label="Главное">
+    <div class="slider" data-slider>
+      <div class="slider__viewport">
+        <div class="slider__track">
+          <a class="slide" href={url("/welcome")}>
+            <img class="slide__bg" src={url("/img/church.jpg")} alt="" style="object-position:50% 35%" fetchpriority="high">
+            <span class="slide__label">Церковь христиан адвентистов седьмого дня</span>
+            <div class="slide__body">
+              <h1 class="slide__title">Ярославская церковь</h1>
+              <p class="slide__text">Место, где изучают Библию, молятся и рады каждому, кто приходит впервые.</p>
+              <span class="btn btn--white">Впервые у нас <Fragment set:html={arrow} /></span>
+            </div>
+          </a>
+          <a class="slide slide--teal" href={url("/schedule")}>
+            <img class="slide__mark" src={url("/img/logo-mark-white.png")} alt="">
+            <span class="slide__label">Богослужения</span>
+            <div class="slide__body">
+              <h2 class="slide__title">Каждую субботу в&nbsp;10:00</h2>
+              <p class="slide__text">Сначала субботняя школа и Школа Библии, в 12:00 — проповедь. После — встречи для детей и молодёжи.</p>
+              <span class="btn btn--white">Расписание <Fragment set:html={arrow} /></span>
+            </div>
+          </a>
+          <a class="slide slide--warm" href={url("/online")}>
+            <img class="slide__mark" src={url("/img/logo-mark-white.png")} alt="">
+            <span class="slide__label">Онлайн</span>
+            <div class="slide__body">
+              <h2 class="slide__title">Богослужение из&nbsp;дома</h2>
+              <p class="slide__text">Трансляция каждую субботу с 10:00 — на YouTube, Rutube и во ВКонтакте.</p>
+              <span class="btn btn--white">Смотреть <Fragment set:html={arrow} /></span>
+            </div>
+          </a>
+          <a class="slide slide--dark" href={url("/schedule")}>
+            <img class="slide__mark" src={url("/img/logo-mark-white.png")} alt="">
+            <span class="slide__label">Для детей и подростков</span>
+            <div class="slide__body">
+              <h2 class="slide__title">Клубы «Следопыт» и&nbsp;«Искатель»</h2>
+              <p class="slide__text">По субботам в 15:00: походы, навыки, творчество и библейские истории.</p>
+              <span class="btn btn--white">Подробнее <Fragment set:html={arrow} /></span>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="slider__arrows" aria-hidden="true">
+        <div class="container">
+          <button class="round-btn" type="button" data-slide="-1" tabindex="-1"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+          <button class="round-btn" type="button" data-slide="1" tabindex="-1"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+        </div>
+      </div>
+      <div class="slider__dots"></div>
+    </div>
+
+    <div class="container">
+      <div class="quick" data-reveal>
+        <div class="quick__item"><span class="quick__label">Ближайшее богослужение</span><span class="quick__value" data-next-service>Суббота, 10:00</span></div>
+        <div class="quick__item"><span class="quick__label" data-sabbath-label>Суббота начнётся</span><span class="quick__value" data-sabbath>в пятницу на закате</span></div>
+        <div class="quick__item"><span class="quick__label">Адрес</span><a class="quick__value" href={url("/contacts")}>{SITE.address}</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ближайшие встречи -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <div><span class="eyebrow">Расписание</span><h2 class="h2">Ближайшие встречи</h2></div>
+        <a class="btn btn--outline" href={url("/schedule")}>Всё расписание <Fragment set:html={arrow} /></a>
+      </div>
+      <div data-reveal style="--d:120ms"><Calendar /></div>
+    </div>
+  </section>
+
+  <!-- Новости -->
+  {latest.length > 0 && (
+    <section class="section section--soft">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <div><span class="eyebrow">Жизнь церкви</span><h2 class="h2">Новости</h2></div>
+          <a class="btn btn--outline" href={url("/news")}>Все новости <Fragment set:html={arrow} /></a>
+        </div>
+        <div class="news-grid">
+          {latest.map((post, i) => <NewsCard post={post} delay={i * 120} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Пастор -->
+  <section class="section">
+    <div class="container split">
+      <div class="split__text" data-reveal>
+        <span class="eyebrow">Пастор общины</span>
+        <h2 class="h2">{SITE.pastor}</h2>
+        <!-- Сюда лучше поставить приветствие пастора его собственными словами -->
+        <p class="pastor__text">Пастор будет рад познакомиться с вами лично: ответить на вопросы о вере и Библии, поддержать в трудную минуту, помолиться вместе.</p>
+        <div class="actions">
+          <a class="btn btn--fill" href={SITE.pastorTelegram}>Написать пастору <Fragment set:html={arrow} /></a>
+          <a class="btn btn--outline" href={url("/about#pastor")}>О церкви</a>
+        </div>
+      </div>
+      <div class="pastor__media" data-reveal style="--d:150ms">
+        <img src={url("/img/pastor.jpg")} alt={`Пастор ${SITE.pastor} с Библией`} loading="lazy">
+      </div>
+    </div>
+  </section>
+
+  <!-- Онлайн -->
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="online" data-reveal>
+        <div>
+          <span class="live"><span class="live__dot"></span>{STREAM.isLive ? 'Сейчас в эфире' : 'Каждую субботу с 10:00'}</span>
+          <h2 class="h2">Богослужение из дома</h2>
+          <p>Не получается прийти? Смотрите трансляцию — а записи можно пересмотреть в любое время.</p>
+          {STREAM.title && <p class="online__now">{STREAM.isLive ? 'В эфире' : 'Последняя запись'}: <a href={STREAM.url}>{STREAM.title}</a></p>}
+          <div class="pills">
+            <a class="pill" href={SOCIALS.youtube}><SocialIcon name="youtube" size={16} />YouTube</a>
+            <a class="pill" href={SOCIALS.rutube}><SocialIcon name="rutube" size={16} />Rutube</a>
+            <a class="pill" href={SOCIALS.vk}><SocialIcon name="vk" size={16} />ВКонтакте</a>
+          </div>
+        </div>
+        <div class="video">
+          {STREAM.embed && <iframe src={STREAM.embed} title={STREAM.title} loading="lazy" allow="clipboard-write; autoplay" allowfullscreen></iframe>}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Бегущая строка -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track">
+      {[0, 1].map(() => (
+        <>
+          <span>Ярославская церковь</span><span>Суббота · 10:00</span><span>Большая Фёдоровская, 111</span><span>Вам здесь рады</span>
+        </>
+      ))}
+    </div>
+  </div>
+
+  <!-- Узнайте больше -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head" data-reveal><div><span class="eyebrow">Добро пожаловать</span><h2 class="h2">Узнайте больше</h2></div></div>
+      <div class="cards">
+        <a class="card" href={url("/welcome")} data-reveal>
+          <span class="card__icon"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V21H3z"/><path d="M9 21v-6h6v6"/></svg></span>
+          <h3 class="h3">Впервые у нас?</h3>
+          <p>Что будет на богослужении, как одеться, что с детьми и как добраться.</p>
+          <span class="card__more">Подробнее <Fragment set:html={arrow} /></span>
+        </a>
+        <a class="card" href={url("/about")} data-reveal style="--d:100ms">
+          <span class="card__icon"><svg viewBox="0 0 24 24"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Zm0 0A2 2 0 0 0 6 22h13"/></svg></span>
+          <h3 class="h3">О церкви</h3>
+          <p>Кто мы, наш дом молитвы на Большой Фёдоровской и пастор общины.</p>
+          <span class="card__more">Подробнее <Fragment set:html={arrow} /></span>
+        </a>
+        <a class="card" href={url("/donate")} data-reveal style="--d:200ms">
+          <span class="card__icon"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8Z"/></svg></span>
+          <h3 class="h3">Поддержать церковь</h3>
+          <p>Добровольные пожертвования через QR-код в приложении любого банка.</p>
+          <span class="card__more">Пожертвовать <Fragment set:html={arrow} /></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <MapBlock />
+</Base>
